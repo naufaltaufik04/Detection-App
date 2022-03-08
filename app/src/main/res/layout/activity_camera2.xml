@@ -8,12 +8,21 @@
     android:gravity="center"
     tools:context=".MainActivity">
 
+
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="650dp">
+
+    </FrameLayout>
+
     <Button
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/bt_open"
-    android:text="Open Camera"
-    android:layout_marginTop="10dp"/>
+        android:id="@+id/bt_open"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Open Camera" />
 
 
 </LinearLayout>
