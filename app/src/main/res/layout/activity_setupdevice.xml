@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/imgBtn_startDetection"
         android:layout_width="279dp"
         android:layout_height="308dp"
         android:layout_marginTop="100dp"
@@ -26,7 +26,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/imgBtn_startDetection" />
 
     <TextView
         android:id="@+id/textView2"

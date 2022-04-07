@@ -15,25 +15,38 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class MainMenu extends AppCompatActivity {
-    private Dialog popUp_updateDevice;
+    private Dialog popupUpdateDevice;
+    private ImageButton imgBtnStartDetection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mainmenu);
-        popUp_updateDevice = new Dialog(this);
+        popupUpdateDevice = new Dialog(this);
+
+        imgBtnStartDetection = (ImageButton) findViewById(R.id.imgBtn_startDetection);
+        imgBtnStartDetection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchActivities();
+            }
+        });
     }
-    public void ShowPopup(View v) {
+    private void switchActivities() {
+        Intent switchActivityIntent = new Intent(this, RunningDetection.class);
+        startActivity(switchActivityIntent);
+    }
+    public void PopupUpdate(View v) {
         TextView txtClose;
-        popUp_updateDevice.setContentView(R.layout.activity_updatedevice);
-        txtClose = (TextView) popUp_updateDevice.findViewById(R.id.txtClose);
+        popupUpdateDevice.setContentView(R.layout.activity_updatedevice);
+        txtClose = (TextView) popupUpdateDevice.findViewById(R.id.txtClose);
         txtClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                popUp_updateDevice.dismiss();
+                popupUpdateDevice.dismiss();
             }
         });
-        popUp_updateDevice.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popUp_updateDevice.show();
+        popupUpdateDevice.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        popupUpdateDevice.show();
     }
 }

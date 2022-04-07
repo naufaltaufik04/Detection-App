@@ -28,17 +28,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_setting"
-        android:onClick="ShowPopup"/>
+        android:onClick="PopupUpdate"/>
 
-    <ImageView
-        android:id="@+id/imageView"
+    <ImageButton
+        android:id="@+id/imgBtn_startDetection"
         android:layout_width="279dp"
         android:layout_height="314dp"
         android:layout_marginTop="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/start_button" />
+        app:srcCompat="@drawable/start_button"
+        android:backgroundTint="@color/white"/>
 
     <TextView
         android:id="@+id/textView"
@@ -51,7 +52,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/imgBtn_startDetection" />
 
     <TextView
         android:id="@+id/textView2"
