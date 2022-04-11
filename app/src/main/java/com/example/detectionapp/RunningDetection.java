@@ -68,4 +68,6 @@ public class RunningDetection extends AppCompatActivity {
         Intent switchActivityIntent = new Intent(this, MainMenu.class);
         startActivity(switchActivityIntent);
     }
+
+
 }
