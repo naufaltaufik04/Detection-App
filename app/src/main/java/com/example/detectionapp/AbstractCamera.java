@@ -77,6 +77,7 @@ public abstract class AbstractCamera<R> extends BaseModule {
                 finish();
             } else {
                 setupCameraX();
+                stopDetection();    // Inisiasi fungsi untuk pemberhentian pendeteksian
             }
         }
     }

@@ -2,7 +2,7 @@
     <string name="app_name">Face Mask Detection</string>
 
     <!--DEVICE-->
-    <string name="update_device_title">Update Device Name</string>
+    <string name="update_device_title">UPDATE DEVICE NAME</string>
     <string name="update_device_description">enter your device name below</string>
     <string name="update_device_name">Device-1</string>
 
