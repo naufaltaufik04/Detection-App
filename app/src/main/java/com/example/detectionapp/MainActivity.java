@@ -20,6 +20,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 
 import org.pytorch.LiteModuleLoader;
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         });
 
         // Click Listener update device name
-        ImageButton updateDevice = popupUpdateDevice.findViewById(R.id.updateDevice);
+        Button updateDevice = popupUpdateDevice.findViewById(R.id.btn_save);
         updateDevice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

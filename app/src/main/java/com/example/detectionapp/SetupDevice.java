@@ -1,6 +1,5 @@
 package com.example.detectionapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -23,6 +22,7 @@ public class SetupDevice extends AppCompatActivity {
         String FirstTimeInstall = sharedPreferences.getString("FirstTimeInstall", "");
 
         if (FirstTimeInstall.equals("Yes")) {
+            finish();
             startActivity(new Intent(SetupDevice.this, MainActivity.class));
         }
 
@@ -38,7 +38,5 @@ public class SetupDevice extends AppCompatActivity {
                 startActivity(new Intent(SetupDevice.this, MainActivity.class));
             }
         });
-
-        finish();
     }
 }

@@ -183,7 +183,7 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);                        // Membuat bitmap dengan ukuran panjang lebar sesuai bitmapnya
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, PrePostProcessor.inputWidth, PrePostProcessor.inputHeight, true);  // Meresize bitmap dengan ukuran panjang lebar sesuai input yang dibutuhkan (mInputWidth = 640, mInputHeight= 640)
 
-        // menyiapkan input tensor
+        // menyiapkan in    put tensor
         final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(resizedBitmap, PrePostProcessor.NO_MEAN_RGB, PrePostProcessor.NO_STD_RGB);
 
         // menjalankan model
