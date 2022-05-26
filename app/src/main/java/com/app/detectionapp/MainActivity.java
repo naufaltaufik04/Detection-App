@@ -4,8 +4,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-package com.example.detectionapp;
+package com.app.detectionapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -14,6 +15,7 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -21,7 +23,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import org.pytorch.LiteModuleLoader;
 import org.pytorch.Module;
@@ -34,10 +44,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements Runnable {
     private Module model = null;
+    private Device device;
+    private FirebaseDetectionDAO firebaseDetectionDAO = new FirebaseDetectionDAO();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +63,16 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         }
 
         setContentView(R.layout.activity_main); // menampilkan halaman ui activity main
+
+        //Get device from setup device
+        if(getIntent().getExtras() != null) {
+            this.device = getIntent().getParcelableExtra("device");
+        }
+
+        if(device == null){
+            SharedPreferences devicePreferences = getSharedPreferences("DEVICE", 0);
+            this.device = new Device(devicePreferences.getString("name", ""), devicePreferences.getString("key", ""));
+        }
 
         // Load model dan labels
         try {
@@ -75,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         updateDevice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showUpdate();
+                showUpdate(view);
             }
         });
 
@@ -93,12 +116,55 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     /**
      Inisiasi dan membuat custom popup update device name beserta dengan fungsinya
      */
-    public void showUpdate() {
-        Dialog popupUpdateDevice = new Dialog(this);
+    public void showUpdate(View view) {
+        Dialog popupUpdateDevice = new Dialog(view.getContext());
         popupUpdateDevice.setContentView(R.layout.activity_updatedevice);
 
         popupUpdateDevice.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popupUpdateDevice.show();
+
+        EditText editTextUpdateDevice = popupUpdateDevice.findViewById(R.id.editTextUpdateDevice);
+        editTextUpdateDevice.setText(device.getName());
+
+        // Click Listener update device name
+        Button updateDevice = popupUpdateDevice.findViewById(R.id.buttonUpdate);
+        updateDevice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String deviceName = editTextUpdateDevice.getText().toString();
+
+                if(deviceName.isEmpty()){
+                    Toast.makeText(MainActivity.this, "Device tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Query devices = FirebaseDatabase.getInstance().getReference("Device").orderByChild("name").equalTo(deviceName);
+                devices.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            Toast.makeText(MainActivity.this, "Device sudah terdaftar", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("name", deviceName);
+
+                        firebaseDetectionDAO.updateDevice(device.getKey(), hashMap);
+                        updateDevice(deviceName);
+
+                        Toast.makeText(MainActivity.this, "Device berhasil diupdate", Toast.LENGTH_SHORT).show();
+                        popupUpdateDevice.dismiss();
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        });
 
         // Click Listener close popup
         ImageButton close = popupUpdateDevice.findViewById(R.id.close);
@@ -109,15 +175,10 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             }
         });
 
-        // Click Listener update device name
-        Button updateDevice = popupUpdateDevice.findViewById(R.id.btn_save);
-        updateDevice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                popupUpdateDevice.dismiss();
-            }
-        });
+    }
 
+    public void updateDevice(String name){
+       this.device.setName(name);
     }
 
     /**
@@ -157,4 +218,15 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     public void run() {
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferences settings = getSharedPreferences("DEVICE", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("name", this.device.getName());
+        editor.putString("key", this.device.getKey());
+        editor.commit();
+    }
 }
+

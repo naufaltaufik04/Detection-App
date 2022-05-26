@@ -4,7 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-package com.example.detectionapp;
+package com.app.detectionapp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -71,12 +71,13 @@ public abstract class AbstractCamera<R> extends BaseModule {
             if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                 Toast.makeText(
                         this,
-                        "You can't use object detection example without granting CAMERA permission",
+                        "You can't use face mask detection without granting CAMERA permission",
                         Toast.LENGTH_LONG)
                         .show();
                 finish();
             } else {
-                setupCameraX();
+                setupCameraX();     // Inisiasi / memulai camera
+                stopDetection();    // Inisiasi fungsi untuk pemberhentian pendeteksian
                 stopDetection();    // Inisiasi fungsi untuk pemberhentian pendeteksian
             }
         }

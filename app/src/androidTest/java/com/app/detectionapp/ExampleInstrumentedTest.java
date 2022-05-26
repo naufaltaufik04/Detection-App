@@ -1,4 +1,4 @@
-package com.example.detectionapp;
+package com.app.detectionapp;
 
 import android.content.Context;
 

@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.example.detectionapp"
+        applicationId "com.app.detectionapp"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
@@ -45,4 +45,9 @@ dependencies {
 
     implementation 'org.pytorch:pytorch_android_lite:1.10.0'
     implementation 'org.pytorch:pytorch_android_torchvision_lite:1.10.0'
+
+    implementation platform('com.google.firebase:firebase-bom:30.0.1')
+    implementation 'com.google.firebase:firebase-database'
 }
+
+apply plugin: 'com.google.gms.google-services'  // Google Services plugin
