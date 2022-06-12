@@ -142,6 +142,10 @@ public class PrePostProcessor {
                 float right = imgScaleX * (x + w/2);
                 float bottom = imgScaleY * (y + h/2);
 
+                ArrayList<Float> wh = new ArrayList<>();
+                wh.add(w);
+                wh.add(h);
+
                 float max = outputs[i* outputColumn +5]; // Prediksi awal class dengan skor prediksi tertinggi adalah class 1 (Without Mask)
                 int cls = 0;
                 for (int j = 0; j < outputColumn -5; j++) { // Selama jumlah class yang ada (3 class)
@@ -153,7 +157,7 @@ public class PrePostProcessor {
 
                 Rect rect = new Rect((int)(startX+ivScaleX*left), (int)(startY+top*ivScaleY),
                         (int)(startX+ivScaleX*right), (int)(startY+ivScaleY*bottom));   // Buat box sesuai yang diprediksi yang disesuaikan dengan ukuran gambar yang akan ditampilkan
-                ResultDetection resultDetection = new ResultDetection(cls, outputs[i* outputColumn +4], rect);      // Gabungkan hasil prediksi beserta bounding box kedalam format result
+                ResultDetection resultDetection = new ResultDetection(cls, outputs[i* outputColumn +4], rect, wh);      // Gabungkan hasil prediksi beserta bounding box kedalam format result
                 resultDetections.add(resultDetection);
             }
         }

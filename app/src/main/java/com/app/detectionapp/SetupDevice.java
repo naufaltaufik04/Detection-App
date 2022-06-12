@@ -52,7 +52,7 @@ public class SetupDevice extends AppCompatActivity {
                 }
 
                 Query devices = FirebaseDatabase.getInstance().getReference("Device").orderByChild("name").equalTo(deviceName);
-                devices.addValueEventListener(new ValueEventListener() {
+                devices.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
                         if (snapshot.exists()) {

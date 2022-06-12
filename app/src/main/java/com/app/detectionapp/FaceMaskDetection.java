@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.graphics.drawable.ColorDrawable;
 import android.media.Image;
+import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.AnalysisResult> {
     private Module model = null;        // Asset File Model
     private ResultView resultView;      // Tampilan hasil
+    private MediaPlayer mp;             // Media Player untuk suara alerting
 
     // Menampung hasil prediksi dalam bentuk ArrayList
     static class AnalysisResult {
@@ -199,6 +201,49 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
         float ivScaleY = (float) resultView.getHeight() / bitmap.getHeight();           // Pembagian tinggi gambar yang akan ditampilkan dengan panjang gambar yang diinputkan
 
         final ArrayList<ResultDetection> resultDetections = PrePostProcessor.outputsToNMSPredictions(outputs, imgScaleX, imgScaleY, ivScaleX, ivScaleY, 0, 0); // Menyimpan hasil prediksi yang sudah dilakukan NMS ke dalam ArrayList results
+        for (ResultDetection result : resultDetections) {
+            if (result.classIndex == 0) {
+                if (result.wh.get(0) <= 400 && result.wh.get(1) <= 350) {
+                    mp = MediaPlayer.create(FaceMaskDetection.this, R.raw.fail);
+                    mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mediaPlayer) {
+                            mp.start();
+                        }
+                    });
+
+                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mediaPlayer) {
+                            mp.release();
+                        }
+                    });
+                }
+            }
+            else if (result.classIndex == 1) {
+                if (result.wh.get(0) <= 400 && result.wh.get(1) <= 350) {
+                    mp = MediaPlayer.create(FaceMaskDetection.this, R.raw.warning);
+                    mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mediaPlayer) {
+                            mp.start();
+                        }
+                    });
+
+                }
+            }
+            else if (result.classIndex == 2) {
+                if (result.wh.get(0) <= 400 && result.wh.get(1) <= 350) {
+                    mp = MediaPlayer.create(FaceMaskDetection.this, R.raw.success);
+                    mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mediaPlayer) {
+                            mp.start();
+                        }
+                    });
+                }
+            }
+        }
         return new AnalysisResult(resultDetections);
     }
 }
