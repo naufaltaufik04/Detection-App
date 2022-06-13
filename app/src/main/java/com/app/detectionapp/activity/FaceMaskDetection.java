@@ -26,6 +26,7 @@ import androidx.camera.core.ImageProxy;
 
 import com.app.detectionapp.camera.AbstractCamera;
 import com.app.detectionapp.entity.Alert;
+import com.app.detectionapp.entity.Distance;
 import com.app.detectionapp.entity.Firebase;
 import com.app.detectionapp.result.ResultDetection;
 import com.app.detectionapp.result.ResultProcessor;
@@ -210,12 +211,23 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
 
         final ArrayList<ResultDetection> resultDetections = ResultProcessor.outputsToNMSPredictions(outputs, imgScaleX, imgScaleY, ivScaleX, ivScaleY, 0, 0); // Menyimpan hasil prediksi yang sudah dilakukan NMS ke dalam ArrayList results
 
-        if(!resultDetections.isEmpty() ){
-            Alert alert = new Alert(this);
-            alert.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections.get(0).status);
+        Distance distance = new Distance();
 
-            Firebase firebase = new Firebase(this);
-            firebase.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections);
+
+
+        if(!resultDetections.isEmpty() ){
+
+            if(distance.distanceEstimation(resultDetections.get(0).boxOriginal.get("width"),resultDetections.get(0).boxOriginal.get("height"))<= 250/2.54) {
+                Alert alert = new Alert(this);
+                alert.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections.get(0).status);
+
+                Firebase firebase = new Firebase(this);
+                firebase.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections);
+            }
+
+
+
+
         }
 
         return new AnalysisResult(resultDetections);

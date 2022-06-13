@@ -12,7 +12,7 @@ public class ResultDetection {
     public int status;     // Index dari class (rentang 0 - 2)
     Float score;        // Score dari class
     Rect box;          // Bounding Box dari wajah
-    Map<String, Float> boxOriginal;
+    public Map<String, Float> boxOriginal;
 
     public ResultDetection(int status, Float score, Rect box, Map<String, Float> boxOriginal) {
         this.status = status;
