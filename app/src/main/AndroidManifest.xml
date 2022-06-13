@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DetectionApp">
         <activity
-            android:name="com.app.detectionapp.SetupDevice">
+            android:name="com.app.detectionapp.activity.SetupDevice">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,12 +21,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.app.detectionapp.MainActivity"
+            android:name="com.app.detectionapp.activity.MainActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
         </activity>
         <activity
-            android:name="com.app.detectionapp.FaceMaskDetection"
+            android:name="com.app.detectionapp.activity.FaceMaskDetection"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
         </activity>

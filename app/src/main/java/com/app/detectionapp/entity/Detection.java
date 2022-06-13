@@ -1,16 +1,19 @@
-package com.app.detectionapp;
+package com.app.detectionapp.entity;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class Detection {
-    private String date;
     private String status;
+    private String date;
 
-    public Detection(String date, String status){
-        this.date = date;
+    public Detection(String status){
         this.status = status;
-    }
-    public Detection(){
 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        this.date = simpleDateFormat.format(Calendar.getInstance().getTime()).toString();
     }
+
     public String getDate() {
         return date;
     }

@@ -1,16 +1,7 @@
-package com.app.detectionapp;
+package com.app.detectionapp.entity;
 
-import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -18,15 +9,18 @@ public class Device implements Parcelable {
     private String name;
     private String key;
     private ArrayList <Detection> detections;
+    private String detectionKey;
 
     public Device() {
         this.detections = new ArrayList<>();
-        this.detections = null;
+        this.key = null;
+        this.detectionKey = null;
     }
 
     public Device(String name, String key) {
         this.name = name;
         this.key = key;
+        this.detectionKey = detectionKey;
     }
 
     public Device(Parcel device) {
@@ -56,6 +50,14 @@ public class Device implements Parcelable {
 
     public void setDetections(ArrayList<Detection> detections) {
         this.detections = detections;
+    }
+
+    public String getDetectionKey() {
+        return detectionKey;
+    }
+
+    public void setDetectionKey(String detectionKey) {
+        this.detectionKey = detectionKey;
     }
 
 

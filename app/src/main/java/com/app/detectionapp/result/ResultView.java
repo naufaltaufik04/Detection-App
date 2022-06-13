@@ -4,7 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-package com.app.detectionapp;
+package com.app.detectionapp.result;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -48,10 +48,11 @@ public class ResultView extends View {
         for (ResultDetection resultDetection : resultDetections) {
             paintRectangle.setStrokeWidth(5);
             paintRectangle.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(resultDetection.rect, paintRectangle);
+            canvas.drawRect(resultDetection.box, paintRectangle);
 
             Path mPath = new Path();
-            RectF mRectF = new RectF(resultDetection.rect.left, resultDetection.rect.top, resultDetection.rect.left + TEXT_WIDTH,  resultDetection.rect.top + TEXT_HEIGHT);
+            RectF mRectF = new RectF(resultDetection.box.left, resultDetection.box.top,
+                    resultDetection.box.left + TEXT_WIDTH,  resultDetection.box.top + TEXT_HEIGHT);
             mPath.addRect(mRectF, Path.Direction.CW);
             paintText.setColor(Color.MAGENTA);
             canvas.drawPath(mPath, paintText);
@@ -61,15 +62,15 @@ public class ResultView extends View {
             paintText.setStyle(Paint.Style.FILL);
             paintText.setTextSize(32);
 
-            System.out.println("LEFT BOX: " + resultDetection.rect.left);
+            System.out.println("LEFT BOX: " + resultDetection.box.left);
             System.out.println("LEFT BOX: " + resultDetection.score);
-            System.out.println("CLASS INDEX: " + resultDetection.classIndex);
+            System.out.println("CLASS INDEX: " + resultDetection.status);
             System.out.println("X: " + TEXT_X);
-            System.out.println("TOP: " + resultDetection.rect.top);
+            System.out.println("TOP: " + resultDetection.box.top);
             System.out.println("Y: " + TEXT_Y);
             System.out.println("text: " + paintText);
-            canvas.drawText(String.format("%s %.2f", PrePostProcessor.classes[resultDetection.classIndex], resultDetection.score),
-                    resultDetection.rect.left + TEXT_X, resultDetection.rect.top + TEXT_Y, paintText);
+            canvas.drawText(String.format("%s %.2f", ResultProcessor.classes[resultDetection.status], resultDetection.score),
+                    resultDetection.box.left + TEXT_X, resultDetection.box.top + TEXT_Y, paintText);
         }
     }
 

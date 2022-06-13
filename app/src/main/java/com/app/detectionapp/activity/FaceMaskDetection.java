@@ -1,5 +1,6 @@
-package com.app.detectionapp;
+package com.app.detectionapp.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.graphics.drawable.ColorDrawable;
 import android.media.Image;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -21,6 +23,14 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.camera.core.ImageProxy;
+
+import com.app.detectionapp.camera.AbstractCamera;
+import com.app.detectionapp.entity.Alert;
+import com.app.detectionapp.entity.Firebase;
+import com.app.detectionapp.result.ResultDetection;
+import com.app.detectionapp.result.ResultProcessor;
+import com.app.detectionapp.R;
+import com.app.detectionapp.result.ResultView;
 
 import org.pytorch.IValue;
 import org.pytorch.LiteModuleLoader;
@@ -155,7 +165,6 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
         return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
     }
 
-
     /**
      Memproses gambar yang diinputkan kedalam bentuk ArrayList
      Parameter:
@@ -164,6 +173,7 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
      Return:
      Hasil prediksi yang sudah diolah
      */
+    @SuppressLint("WrongThread")
     @Override
     @WorkerThread
     @Nullable
@@ -181,10 +191,10 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
         Matrix matrix = new Matrix();
         matrix.postRotate(90.0f); // Mengatur rotasi bitmap
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);                        // Membuat bitmap dengan ukuran panjang lebar sesuai bitmapnya
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, PrePostProcessor.inputWidth, PrePostProcessor.inputHeight, true);  // Meresize bitmap dengan ukuran panjang lebar sesuai input yang dibutuhkan (mInputWidth = 640, mInputHeight= 640)
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, ResultProcessor.inputWidth, ResultProcessor.inputHeight, true);  // Meresize bitmap dengan ukuran panjang lebar sesuai input yang dibutuhkan (mInputWidth = 640, mInputHeight= 640)
 
         // menyiapkan input tensor
-        final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(resizedBitmap, PrePostProcessor.NO_MEAN_RGB, PrePostProcessor.NO_STD_RGB);
+        final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(resizedBitmap, ResultProcessor.NO_MEAN_RGB, ResultProcessor.NO_STD_RGB);
 
         // menjalankan model
         IValue[] outputTuple = model.forward(IValue.from(inputTensor)).toTuple();
@@ -193,12 +203,21 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
         // Memproses hasil
         final float[] outputs = outputTensor.getDataAsFloatArray();
 
-        float imgScaleX = (float)bitmap.getWidth() / PrePostProcessor.inputWidth;      // Pembagian panjang gambar yang diinputkan dengan panjang gambar input yang dibutuhkan (mInputWidth = 640)
-        float imgScaleY = (float)bitmap.getHeight() / PrePostProcessor.inputHeight;    // Pembagian tinggi gambar yang diinputkan dengan tinggi gambar input yang dibutuhkan (mInputHeight = 640)
+        float imgScaleX = (float) bitmap.getWidth() / ResultProcessor.inputWidth;      // Pembagian panjang gambar yang diinputkan dengan panjang gambar input yang dibutuhkan (mInputWidth = 640)
+        float imgScaleY = (float) bitmap.getHeight() / ResultProcessor.inputHeight;    // Pembagian tinggi gambar yang diinputkan dengan tinggi gambar input yang dibutuhkan (mInputHeight = 640)
         float ivScaleX = (float) resultView.getWidth() / bitmap.getWidth();             // Pembagian panjang gambar yang akan ditampilkan dengan panjang gambar yang diinputkan
         float ivScaleY = (float) resultView.getHeight() / bitmap.getHeight();           // Pembagian tinggi gambar yang akan ditampilkan dengan panjang gambar yang diinputkan
 
-        final ArrayList<ResultDetection> resultDetections = PrePostProcessor.outputsToNMSPredictions(outputs, imgScaleX, imgScaleY, ivScaleX, ivScaleY, 0, 0); // Menyimpan hasil prediksi yang sudah dilakukan NMS ke dalam ArrayList results
+        final ArrayList<ResultDetection> resultDetections = ResultProcessor.outputsToNMSPredictions(outputs, imgScaleX, imgScaleY, ivScaleX, ivScaleY, 0, 0); // Menyimpan hasil prediksi yang sudah dilakukan NMS ke dalam ArrayList results
+
+        if(!resultDetections.isEmpty() ){
+            Alert alert = new Alert(this);
+            alert.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections.get(0).status);
+
+            Firebase firebase = new Firebase(this);
+            firebase.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections);
+        }
+
         return new AnalysisResult(resultDetections);
     }
 }

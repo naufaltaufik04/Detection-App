@@ -4,7 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-package com.app.detectionapp;
+package com.app.detectionapp.result;
 
 import android.graphics.Rect;
 
@@ -12,24 +12,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  Class PrePostProcessor
  Inisiasi nilai input agar sesuai dengan model, beserta fungsi untuk pengolahan
  ouput yang dihasilkan dari prediksi dengan model yang digunakan
  * */
-public class PrePostProcessor {
-    static float[] NO_MEAN_RGB = new float[] {0.0f, 0.0f, 0.0f};
-    static float[] NO_STD_RGB = new float[] {1.0f, 1.0f, 1.0f};
+public class ResultProcessor {
+    public static float[] NO_MEAN_RGB = new float[] {0.0f, 0.0f, 0.0f};
+    public static float[] NO_STD_RGB = new float[] {1.0f, 1.0f, 1.0f};
 
-    static int inputWidth = 640;   // Lebar dari input image
-    static int inputHeight = 640;  // Tinggi dari input image
+    public static int inputWidth = 640;   // Lebar dari input image
+    public static int inputHeight = 640;  // Tinggi dari input image
 
     private static int outputRow = 25200;       // Jumlah output baris default 25200 jika menggunakan input size 640
     private static int outputColumn = 8;        // Jumlah output kolom (x1,y1,lebar,tinggi,confidence skoce,jumlah class(3 class))
     private static float threshold = 0.70f;     // Nilai ambang batas dari confidence score untuk NMS yang akan dipilih
     private static int limit = 15;              // Jumlah batas box dalam satu frame
-    static String[] classes;                   // Daftar dari class yang digunakan
+    public static String[] classes;                   // Daftar dari class yang digunakan
 
     /**
      Algoritma Non Max Suppression yang digunakan YOLOv5
@@ -75,7 +77,7 @@ public class PrePostProcessor {
                     if (active[j]) { // Jika box masih belum dihilangkan
                         ResultDetection boxB = boxes.get(j);
                         // Hapus box yang tumpang tindih yang melebihi nilai ambang batas
-                        if (IOU(boxA.rect, boxB.rect) > threshold) {
+                        if (IOU(boxA.box, boxB.box) > threshold) {
                             active[j] = false;      // Hapus box
                             numActive -= 1;         // Jumlah box kurangi 1
                             if (numActive <= 0) {   // Jika sudah tidak ada box berhenti
@@ -128,7 +130,7 @@ public class PrePostProcessor {
      Return:
      Hasil prediksi yang sudah dilakukan NMS
      */
-    static ArrayList<ResultDetection> outputsToNMSPredictions(float[] outputs, float imgScaleX, float imgScaleY, float ivScaleX, float ivScaleY, float startX, float startY) {
+    public static ArrayList<ResultDetection> outputsToNMSPredictions(float[] outputs, float imgScaleX, float imgScaleY, float ivScaleX, float ivScaleY, float startX, float startY) {
         ArrayList<ResultDetection> resultDetections = new ArrayList<>();
         for (int i = 0; i< outputRow; i++) {   // Selama masih ada box (25200)
             if (outputs[i* outputColumn +4] > threshold) {    // Jika skor nya lebih besar dari ambang batas
@@ -136,6 +138,10 @@ public class PrePostProcessor {
                 float y = outputs[i* outputColumn +1]; // Isi dengan koordinat y dari box
                 float w = outputs[i* outputColumn +2]; // Isi dengan lebar box
                 float h = outputs[i* outputColumn +3]; // Isi dengan tinggi box
+
+                Map<String, Float> originalBox = new HashMap<>();
+                originalBox.put("width", w);
+                originalBox.put("height", h);
 
                 float left = imgScaleX * (x - w/2);
                 float top = imgScaleY * (y - h/2);
@@ -153,7 +159,7 @@ public class PrePostProcessor {
 
                 Rect rect = new Rect((int)(startX+ivScaleX*left), (int)(startY+top*ivScaleY),
                         (int)(startX+ivScaleX*right), (int)(startY+ivScaleY*bottom));   // Buat box sesuai yang diprediksi yang disesuaikan dengan ukuran gambar yang akan ditampilkan
-                ResultDetection resultDetection = new ResultDetection(cls, outputs[i* outputColumn +4], rect);      // Gabungkan hasil prediksi beserta bounding box kedalam format result
+                ResultDetection resultDetection = new ResultDetection(cls, outputs[i* outputColumn +4], rect, originalBox);      // Gabungkan hasil prediksi beserta bounding box kedalam format result
                 resultDetections.add(resultDetection);
             }
         }

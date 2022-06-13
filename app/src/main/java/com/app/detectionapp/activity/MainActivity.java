@@ -4,7 +4,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-package com.app.detectionapp;
+package com.app.detectionapp.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +27,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.app.detectionapp.entity.DetectionResults;
+import com.app.detectionapp.entity.Device;
+import com.app.detectionapp.entity.Firebase;
+import com.app.detectionapp.detection.FirebaseDetectionDAO;
+import com.app.detectionapp.result.ResultProcessor;
+import com.app.detectionapp.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -49,8 +55,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements Runnable {
     private Module model = null;
-    private Device device;
+    private Device device = null;
     private FirebaseDetectionDAO firebaseDetectionDAO = new FirebaseDetectionDAO();
+    Dialog popupUpdateDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +74,20 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         //Get device from setup device
         if(getIntent().getExtras() != null) {
             this.device = getIntent().getParcelableExtra("device");
+
+            SharedPreferences settings = getSharedPreferences("DEVICE", 0);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString("name", this.device.getName());
+            editor.putString("key", this.device.getKey());
+            editor.commit();
         }
 
         if(device == null){
             SharedPreferences devicePreferences = getSharedPreferences("DEVICE", 0);
             this.device = new Device(devicePreferences.getString("name", ""), devicePreferences.getString("key", ""));
         }
+
+        DetectionResults detectionResults = new DetectionResults();
 
         // Load model dan labels
         try {
@@ -86,8 +101,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             while ((line = br.readLine()) != null) { // Selama baris dalam file tidak kosong
                 classes.add(line); // Tambahkan baris ke list class
             }
-            PrePostProcessor.classes = new String[classes.size()]; // Definisikan jumlah array sesuai jumlah class
-            classes.toArray(PrePostProcessor.classes); //mengembalikan array yang berisi semua elemen dalam ArrayList dalam urutan yang benar.
+            ResultProcessor.classes = new String[classes.size()]; // Definisikan jumlah array sesuai jumlah class
+            classes.toArray(ResultProcessor.classes); //mengembalikan array yang berisi semua elemen dalam ArrayList dalam urutan yang benar.
         } catch (IOException e) {
             Log.e("Object Detection", "Error reading assets", e);
             finish();
@@ -117,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
      Inisiasi dan membuat custom popup update device name beserta dengan fungsinya
      */
     public void showUpdate(View view) {
-        Dialog popupUpdateDevice = new Dialog(view.getContext());
+        popupUpdateDevice = new Dialog(view.getContext());
         popupUpdateDevice.setContentView(R.layout.activity_updatedevice);
 
         popupUpdateDevice.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -138,31 +153,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                     return;
                 }
 
-                Query devices = FirebaseDatabase.getInstance().getReference("Device").orderByChild("name").equalTo(deviceName);
-                devices.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            Toast.makeText(MainActivity.this, "Device sudah terdaftar", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        HashMap<String, Object> hashMap = new HashMap<>();
-                        hashMap.put("name", deviceName);
-
-                        firebaseDetectionDAO.updateDevice(device.getKey(), hashMap);
-                        updateDevice(deviceName);
-
-                        Toast.makeText(MainActivity.this, "Device berhasil diupdate", Toast.LENGTH_SHORT).show();
-                        popupUpdateDevice.dismiss();
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
+                uniqueCheck(deviceName);
             }
         });
 
@@ -175,6 +166,33 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             }
         });
 
+    }
+
+    private void uniqueCheck(String deviceName) {
+        Query devices = FirebaseDatabase.getInstance().getReference("Device").orderByChild("name").equalTo(deviceName);
+        devices.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Toast.makeText(MainActivity.this, "Device sudah terdaftar", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("name", deviceName);
+
+                firebaseDetectionDAO.updateDevice(device.getKey(), hashMap);
+                updateDevice(deviceName);
+
+                Toast.makeText(MainActivity.this, "Device berhasil diupdate", Toast.LENGTH_SHORT).show();
+                popupUpdateDevice.dismiss();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     public void updateDevice(String name){
@@ -227,6 +245,9 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         editor.putString("name", this.device.getName());
         editor.putString("key", this.device.getKey());
         editor.commit();
+
+        Firebase firebase = new Firebase(this);
+        firebase.sendResult();
     }
 }
 
