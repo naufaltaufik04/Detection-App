@@ -25,7 +25,7 @@ public class Firebase extends AsyncTask<ArrayList<ResultDetection>, Void, String
         this.firebaseDetectionDAO = new FirebaseDetectionDAO();
         SharedPreferences devicePreferences = context.getSharedPreferences("DEVICE", 0);
         this.device = new Device(devicePreferences.getString("name", ""),
-                devicePreferences.getString("key", ""));
+                devicePreferences.getString("key", ""), devicePreferences.getString("location", "") );
     }
 
     @Override
