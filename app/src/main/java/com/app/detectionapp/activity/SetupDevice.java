@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.app.detectionapp.entity.Device;
-import com.app.detectionapp.detection.FirebaseDetectionDAO;
+import com.app.detectionapp.firebase.FirebaseDetectionDAO;
 import com.app.detectionapp.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,6 +23,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 public class SetupDevice extends AppCompatActivity {
+    private static final String SETUP_DEVICE = "SetupDevice";
+    private static final String SETUP_SUCCESS = "Setup Sucess";
+
     SharedPreferences setupPreference;
 
     @Override
@@ -31,9 +34,9 @@ public class SetupDevice extends AppCompatActivity {
         setContentView(R.layout.activity_setupdevice);
 
         setupPreference = getSharedPreferences("PREFERENCE", MODE_PRIVATE);
-        String FirstTimeInstall = setupPreference.getString("FirstTimeInstall", "");
+        String setup = setupPreference.getString(SETUP_DEVICE, "");
 
-        if (FirstTimeInstall.equals("Yes")) {
+        if (setup.equals(SETUP_SUCCESS)) {
             finish();
             startActivity(new Intent(SetupDevice.this, MainActivity.class));
         }
@@ -58,6 +61,11 @@ public class SetupDevice extends AppCompatActivity {
         });
     }
 
+    /**
+     Pengecekan unik nama device ke firebase
+     Parameter:
+     - deviceName : data nama device
+     */
     public void uniqueCheck(String deviceName){
         Query devices = FirebaseDatabase.getInstance().getReference("Device").orderByChild("name").equalTo(deviceName);
         devices.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -78,7 +86,7 @@ public class SetupDevice extends AppCompatActivity {
                 Toast.makeText(SetupDevice.this, "Device berhasil dibuat", Toast.LENGTH_SHORT).show();
 
                 SharedPreferences.Editor editor = setupPreference.edit();
-                editor.putString("FirstTimeInstall", "Yes");
+                editor.putString(SETUP_DEVICE, SETUP_SUCCESS);
                 editor.apply();
 
                 finish();
@@ -86,7 +94,6 @@ public class SetupDevice extends AppCompatActivity {
                 Intent mainMenu = new Intent(SetupDevice.this, MainActivity.class);
                 mainMenu.putExtra("device", device);
                 startActivity(mainMenu);
-
             }
 
             @Override

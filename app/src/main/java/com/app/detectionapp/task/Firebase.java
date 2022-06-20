@@ -1,4 +1,4 @@
-package com.app.detectionapp.entity;
+package com.app.detectionapp.task;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,7 +6,10 @@ import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 
-import com.app.detectionapp.detection.FirebaseDetectionDAO;
+import com.app.detectionapp.firebase.FirebaseDetectionDAO;
+import com.app.detectionapp.entity.Detection;
+import com.app.detectionapp.entity.DetectionResults;
+import com.app.detectionapp.entity.Device;
 import com.app.detectionapp.result.ResultDetection;
 import com.app.detectionapp.result.ResultProcessor;
 import com.google.firebase.database.DataSnapshot;
@@ -17,6 +20,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+/**
+ Class Firebase
+ Melakukan berbagai proses pekerjaan pengiriman firebase secara asyncronus
+ */
 public class Firebase extends AsyncTask<ArrayList<ResultDetection>, Void, String>{
     private FirebaseDetectionDAO firebaseDetectionDAO;
     private Device device;
@@ -32,20 +39,36 @@ public class Firebase extends AsyncTask<ArrayList<ResultDetection>, Void, String
     protected void onPreExecute() {
         super.onPreExecute();
     }
+
+    /**
+     Asyncronus Task penyimpanan data secara lokal dan pengiriman data ke firebase
+     Parameter:
+     - Image : Gambar yang akan dilakukan proses deteksi
+     Return :
+     Keterangan sukses
+     */
     @Override
     protected String doInBackground(ArrayList<ResultDetection>... resultDetections) {
         saveResult(resultDetections[0]);
-        if(DetectionResults.detections.size() >= 10){
+
+        // Jika data hasil deteksi sudah lebih dari yang di set (default = 100 data)
+        if(DetectionResults.detections.size() >= DetectionResults.TOTAL_RESULT){
             sendResult();
         }
 
         return "Success";
     }
+
     @Override
     protected void onPostExecute(String string) {
         super.onPostExecute(string);
     }
 
+    /**
+     Penyimpanan data hasil deteksi secara lokal
+     Parameter:
+     - resultDetection : Hasil deteksi penggunaan masker
+     */
     public void saveResult(ArrayList<ResultDetection> resultDetections){
         for(ResultDetection result: resultDetections){
             Detection detection = new Detection(ResultProcessor.classes[result.status]);
@@ -53,6 +76,9 @@ public class Firebase extends AsyncTask<ArrayList<ResultDetection>, Void, String
         }
     }
 
+    /**
+     Pengiriman data hasil deteksi yang sudah tersimpan secara lokal ke firebase
+     */
     public void sendResult(){
         Query detection = FirebaseDatabase.getInstance().getReference("Device").orderByChild("name").equalTo(this.device.getName());
         detection.addListenerForSingleValueEvent(new ValueEventListener() {

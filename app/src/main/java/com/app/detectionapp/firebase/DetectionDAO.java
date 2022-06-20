@@ -1,4 +1,4 @@
-package com.app.detectionapp.detection;
+package com.app.detectionapp.firebase;
 
 import com.app.detectionapp.entity.Detection;
 import com.app.detectionapp.entity.Device;

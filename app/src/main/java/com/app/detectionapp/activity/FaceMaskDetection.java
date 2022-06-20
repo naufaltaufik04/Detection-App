@@ -25,9 +25,9 @@ import androidx.annotation.WorkerThread;
 import androidx.camera.core.ImageProxy;
 
 import com.app.detectionapp.camera.AbstractCamera;
-import com.app.detectionapp.entity.Alert;
-import com.app.detectionapp.entity.Distance;
-import com.app.detectionapp.entity.Firebase;
+import com.app.detectionapp.task.Alert;
+import com.app.detectionapp.task.Distance;
+import com.app.detectionapp.task.Firebase;
 import com.app.detectionapp.result.ResultDetection;
 import com.app.detectionapp.result.ResultProcessor;
 import com.app.detectionapp.R;
@@ -88,6 +88,9 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
         getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
+    /**
+     Menampilkan popup konfirmasi pemberhentian pendeteksian
+     */
     public void showConfirmation(){
         Dialog stopConfirmation = new Dialog(this);
         stopConfirmation.setContentView(R.layout.activity_stopdetection);
@@ -114,7 +117,10 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
         });
     }
 
-    // Inisiasi layout object detection texture view yang digunakan saat setup Camera di class AbstractCameraXActivity
+    /**
+     Inisiasi layout object detection texture view yang digunakan saat setup Camera di
+     class AbstractCameraXActivity
+     */
     @Override
     protected TextureView getCameraPreviewTextureView() {
         resultView = findViewById(R.id.resultView);
@@ -211,23 +217,18 @@ public class FaceMaskDetection extends AbstractCamera<FaceMaskDetection.Analysis
 
         final ArrayList<ResultDetection> resultDetections = ResultProcessor.outputsToNMSPredictions(outputs, imgScaleX, imgScaleY, ivScaleX, ivScaleY, 0, 0); // Menyimpan hasil prediksi yang sudah dilakukan NMS ke dalam ArrayList results
 
-        Distance distance = new Distance();
-
-
-
         if(!resultDetections.isEmpty() ){
+            float width = resultDetections.get(0).boxOriginal.get("width");
+            float height = resultDetections.get(0).boxOriginal.get("height");
+            Distance distance = new Distance();
 
-            if(distance.distanceEstimation(resultDetections.get(0).boxOriginal.get("width"),resultDetections.get(0).boxOriginal.get("height"))<= 250/2.54) {
+            if(distance.distanceEstimation(width, height) <= distance.inchToCm(Distance.ACCEPTED_DISTANCE)) {
                 Alert alert = new Alert(this);
                 alert.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections.get(0).status);
 
                 Firebase firebase = new Firebase(this);
                 firebase.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, resultDetections);
             }
-
-
-
-
         }
 
         return new AnalysisResult(resultDetections);

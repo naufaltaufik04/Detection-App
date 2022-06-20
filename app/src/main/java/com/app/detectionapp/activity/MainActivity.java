@@ -29,8 +29,8 @@ import android.widget.Toast;
 
 import com.app.detectionapp.entity.DetectionResults;
 import com.app.detectionapp.entity.Device;
-import com.app.detectionapp.entity.Firebase;
-import com.app.detectionapp.detection.FirebaseDetectionDAO;
+import com.app.detectionapp.task.Firebase;
+import com.app.detectionapp.firebase.FirebaseDetectionDAO;
 import com.app.detectionapp.result.ResultProcessor;
 import com.app.detectionapp.R;
 import com.google.firebase.database.DataSnapshot;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     private Module model = null;
     private Device device = null;
     private FirebaseDetectionDAO firebaseDetectionDAO = new FirebaseDetectionDAO();
-    Dialog popupUpdateDevice;
+    private Dialog popupUpdateDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +168,11 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
     }
 
+    /**
+     Pengecekan unik nama device ke firebase
+     Parameter:
+     - deviceName : data nama device
+     */
     private void uniqueCheck(String deviceName) {
         Query devices = FirebaseDatabase.getInstance().getReference("Device").orderByChild("name").equalTo(deviceName);
         devices.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -200,10 +205,10 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     }
 
     /**
-     Periksa assets pada penyimpanan android dan mengembalikan absolute path nya
+     Mendapatkan path absolut dari file asset pada penyimpanan eksternal android
      Parameter:
-     - context:
-     - assetName: Nama asset
+     - context: konteks ui
+     - assetName: Nama asset yang dicari
      Return:
      Absolute path dari asset
      */

@@ -40,6 +40,11 @@ public class ResultView extends View {
         paintText = new Paint();
     }
 
+    /**
+     Menampilkan bounding box berdasarkan hasil pendeteksian
+     Parameter:
+     - canvas:
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -62,18 +67,16 @@ public class ResultView extends View {
             paintText.setStyle(Paint.Style.FILL);
             paintText.setTextSize(32);
 
-            System.out.println("LEFT BOX: " + resultDetection.box.left);
-            System.out.println("LEFT BOX: " + resultDetection.score);
-            System.out.println("CLASS INDEX: " + resultDetection.status);
-            System.out.println("X: " + TEXT_X);
-            System.out.println("TOP: " + resultDetection.box.top);
-            System.out.println("Y: " + TEXT_Y);
-            System.out.println("text: " + paintText);
             canvas.drawText(String.format("%s %.2f", ResultProcessor.classes[resultDetection.status], resultDetection.score),
                     resultDetection.box.left + TEXT_X, resultDetection.box.top + TEXT_Y, paintText);
         }
     }
 
+    /**
+     Mengatur nilai hasil pendeteksian
+     Parameter:
+     - resultDetection: hasil pendeteksian
+     */
     public void setResults(ArrayList<ResultDetection> resultDetections) {
         this.resultDetections = resultDetections;
     }

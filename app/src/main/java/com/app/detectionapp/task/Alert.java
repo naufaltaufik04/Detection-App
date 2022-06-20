@@ -1,4 +1,4 @@
-package com.app.detectionapp.entity;
+package com.app.detectionapp.task;
 
 import android.content.Context;
 import android.media.MediaPlayer;
@@ -6,6 +6,10 @@ import android.os.AsyncTask;
 
 import com.app.detectionapp.R;
 
+/**
+ Class Firebase
+ Melakukan berbagai proses alerting secara asyncronus
+ */
 public class Alert extends AsyncTask<Integer, Void, String>{
     static final int WITHOUT_MASK = 0;
     static final int INCORRECT_MASK = 1;
@@ -31,10 +35,16 @@ public class Alert extends AsyncTask<Integer, Void, String>{
         super.onPostExecute(string);
     }
 
+    /**
+     Menjalankan alerting berdasarkan status hasil pendeteksian
+     Parameter:
+     - detectionStatus: status hasil pendeteksian
+     */
     public void run(int detectionStatus){
         MediaPlayer mediaPlayer = MediaPlayer.create(this.context, alertingAssets(detectionStatus));
         mediaPlayer.start();
 
+        //Mereset source assets untuk alerting
         mediaPlayer.setOnCompletionListener( new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
@@ -43,6 +53,13 @@ public class Alert extends AsyncTask<Integer, Void, String>{
         });
     }
 
+    /**
+     Pemilihan asset yang digunakan untuk melakukan alerting berdasarkan status hasil pendeteksian
+     Parameter:
+     - detectionStatus: status hasil pendeteksian
+     Return :
+     Nilai raw dari assets yang terpilih
+     */
     public int alertingAssets(int detectionStatus){
         int assets = 0;
         switch (detectionStatus){

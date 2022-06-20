@@ -9,18 +9,15 @@ public class Device implements Parcelable {
     private String name;
     private String key;
     private ArrayList <Detection> detections;
-    private String detectionKey;
 
     public Device() {
         this.detections = new ArrayList<>();
         this.key = null;
-        this.detectionKey = null;
     }
 
     public Device(String name, String key) {
         this.name = name;
         this.key = key;
-        this.detectionKey = detectionKey;
     }
 
     public Device(Parcel device) {
@@ -51,15 +48,6 @@ public class Device implements Parcelable {
     public void setDetections(ArrayList<Detection> detections) {
         this.detections = detections;
     }
-
-    public String getDetectionKey() {
-        return detectionKey;
-    }
-
-    public void setDetectionKey(String detectionKey) {
-        this.detectionKey = detectionKey;
-    }
-
 
     @Override
     public int describeContents() {

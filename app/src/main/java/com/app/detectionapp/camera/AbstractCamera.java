@@ -128,7 +128,7 @@ public abstract class AbstractCamera<R> extends BaseModule {
                         .build();
         final ImageAnalysis imageAnalysis = new ImageAnalysis(imageAnalysisConfig);
         imageAnalysis.setAnalyzer((image, rotationDegrees) -> {
-            if (SystemClock.elapsedRealtime() - mLastAnalysisResultTime < 5000) {
+            if (SystemClock.elapsedRealtime() - mLastAnalysisResultTime < 2000) {
                 return;
             }
 
