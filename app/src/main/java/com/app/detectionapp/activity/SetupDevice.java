@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.View;
 
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -27,12 +30,17 @@ public class SetupDevice extends AppCompatActivity {
     private static final String SETUP_SUCCESS = "Setup Sucess";
 
     SharedPreferences setupPreference;
+    String[] locations = {"Lab ICT 1", "Lab ICT 2", "Lab RPL"};
+    AutoCompleteTextView autoCompleteTextView;
+    ArrayAdapter<String> adapterItems;
+    private Device device;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setupdevice);
 
+        this.device = new Device();
         setupPreference = getSharedPreferences("PREFERENCE", MODE_PRIVATE);
         String setup = setupPreference.getString(SETUP_DEVICE, "");
 
@@ -42,6 +50,19 @@ public class SetupDevice extends AppCompatActivity {
         }
 
         EditText editTextSetupDevice = findViewById(R.id.editTextSetup);
+
+        autoCompleteTextView = findViewById(R.id.auto_complete);
+        adapterItems = new ArrayAdapter<String>(this,R.layout.list_item,locations);
+        autoCompleteTextView.setAdapter(adapterItems);
+
+
+        autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String deviceLocation = parent.getItemAtPosition(position).toString();
+                device.setLocation(deviceLocation);
+            }
+        });
 
         // Click Listerner Setup Device Name Button
         Button setupButton = findViewById(R.id.btn_save);;
@@ -76,12 +97,16 @@ public class SetupDevice extends AppCompatActivity {
                     return;
                 }
 
-                Device device = new Device();
                 device.setName(deviceName);
+                if(device.getLocation().isEmpty()){
+                    Toast.makeText(SetupDevice.this, "Lokasi harus dipilih", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 FirebaseDetectionDAO firebaseDetectionDAO = new FirebaseDetectionDAO();
                 firebaseDetectionDAO.addDevice(device);
                 device.setKey(firebaseDetectionDAO.getDeviceKey());
+
 
                 Toast.makeText(SetupDevice.this, "Device berhasil dibuat", Toast.LENGTH_SHORT).show();
 

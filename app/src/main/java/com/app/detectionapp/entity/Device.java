@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public class Device implements Parcelable {
     private String name;
+    private String location;
     private String key;
     private ArrayList <Detection> detections;
 
@@ -15,9 +16,10 @@ public class Device implements Parcelable {
         this.key = null;
     }
 
-    public Device(String name, String key) {
+    public Device(String name, String key, String location) {
         this.name = name;
         this.key = key;
+        this.location = location;
     }
 
     public Device(Parcel device) {
@@ -31,6 +33,14 @@ public class Device implements Parcelable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getKey() {

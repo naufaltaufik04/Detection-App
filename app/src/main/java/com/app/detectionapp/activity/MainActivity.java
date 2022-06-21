@@ -79,12 +79,13 @@ public class MainActivity extends AppCompatActivity implements Runnable {
             SharedPreferences.Editor editor = settings.edit();
             editor.putString("name", this.device.getName());
             editor.putString("key", this.device.getKey());
+            editor.putString("location", this.device.getLocation());
             editor.commit();
         }
 
         if(device == null){
             SharedPreferences devicePreferences = getSharedPreferences("DEVICE", 0);
-            this.device = new Device(devicePreferences.getString("name", ""), devicePreferences.getString("key", ""));
+            this.device = new Device(devicePreferences.getString("name", ""), devicePreferences.getString("key", ""), devicePreferences.getString("location", ""));
         }
 
         DetectionResults detectionResults = new DetectionResults();
@@ -249,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("name", this.device.getName());
         editor.putString("key", this.device.getKey());
+        editor.putString("location", this.device.getLocation());
         editor.commit();
 
         Firebase firebase = new Firebase(this);
